@@ -58,8 +58,8 @@ namespace TxbImageTool.Conversion
             }
 
             // Build base xgr file
-            var currentFileNamePass1 = string.Empty;
-            var currentFileExtnPass1 = string.Empty;
+            var currentFileName = string.Empty;
+            var currentFileExtn = string.Empty;
             var ddsList = new List<(string, ImageType, GTEXVersion)>();
 
             using (var outXGRwriter = new StreamWriter(outXGRfile, true, new UTF8Encoding(false)))
@@ -74,59 +74,50 @@ namespace TxbImageTool.Conversion
 
                     if (jsonReader.TokenType != JsonTokenType.StartObject)
                     {
-                        if (currentFileNamePass1 == "")
+                        if (currentFileName == "")
                         {
                             SharedMethods.ErrorExit("The files array does not begin with a valid start object character");
                         }
                         else
                         {
-                            SharedMethods.ErrorExit($"A valid start object character was not present after this fileName {currentFileNamePass1}");
+                            SharedMethods.ErrorExit($"A valid start object character was not present after this fileName {currentFileName}");
                         }
                     }
 
                     // Get fileName
-                    _ = jsonReader.Read();
-                    _ = jsonReader.Read();
-
                     CheckTokenType("PropertyName", ref jsonReader, "fileName");
-                    currentFileNamePass1 = jsonReader.GetString();
+                    _ = jsonReader.Read();
+                    currentFileName = jsonReader.GetString();
 
-                    var currentFileNameArray = Encoding.UTF8.GetBytes(currentFileNamePass1);
+
+                    var currentFileNameArray = Encoding.UTF8.GetBytes(currentFileName);
                     outXGRwriter.Write(Encoding.UTF8.GetString(currentFileNameArray));
 
                     PadNullStringChara(outXGRwriter, (16 - (uint)currentFileNameArray.Length) + 8);
 
                     // Get fileExtension
-                    _ = jsonReader.Read();
-                    _ = jsonReader.Read();
-
                     CheckTokenType("PropertyName", ref jsonReader, "extension");
-                    currentFileExtnPass1 = jsonReader.GetString();
+                    _ = jsonReader.Read();
+                    currentFileExtn = jsonReader.GetString();
 
                     // Get image bool
-                    _ = jsonReader.Read();
-                    _ = jsonReader.Read();
-
                     CheckTokenType("PropertyName", ref jsonReader, "isImage");
+                    _ = jsonReader.Read();
                     var isImg = jsonReader.GetBoolean();
 
                     // Get gtex version
-                    _ = jsonReader.Read();
-                    _ = jsonReader.Read();
-
                     CheckTokenType("PropertyName", ref jsonReader, "gtexVersion");
+                    _ = jsonReader.Read();
                     var gtexVersionVal = jsonReader.GetByte();
 
                     // Get image type
-                    _ = jsonReader.Read();
-                    _ = jsonReader.Read();
-
                     CheckTokenType("PropertyName", ref jsonReader, "gtexVersion");
+                    _ = jsonReader.Read();
                     var imageType = jsonReader.GetString();
 
                     if (isImg)
                     {
-                        var imgFile = currentFileNamePass1 + "." + currentFileExtnPass1;
+                        var imgFile = currentFileName + ".txbh." + currentFileExtn;
                         outXGRwriter.Write("txbh");
                         PadNullStringChara(outXGRwriter, 8 - 4);
 
@@ -144,7 +135,7 @@ namespace TxbImageTool.Conversion
                     }
                     else
                     {
-                        var currentFileExtnArray = Encoding.UTF8.GetBytes(currentFileExtnPass1);
+                        var currentFileExtnArray = Encoding.UTF8.GetBytes(currentFileExtn);
 
                         outXGRwriter.Write(Encoding.UTF8.GetString(currentFileExtnArray));
                         PadNullStringChara(outXGRwriter, 8 - (uint)currentFileExtnArray.Length);
@@ -155,7 +146,7 @@ namespace TxbImageTool.Conversion
 
                     if (jsonReader.TokenType != JsonTokenType.EndObject)
                     {
-                        SharedMethods.ErrorExit($"A valid end object character was not present after this fileName {currentFileNamePass1}");
+                        SharedMethods.ErrorExit($"A valid end object character was not present after this fileName {currentFileName}");
                     }
                 }
             }
@@ -258,7 +249,7 @@ namespace TxbImageTool.Conversion
                 var currentGTEXver = currentDataFromList.Item3;
 
                 var currentTxbhFile = string.Empty;
-                currentTxbhFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh");
+                currentTxbhFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname));
                 SharedMethods.IfFileFolderExistsDel(currentTxbhFile, true);
                 SharedMethods.CreateNewTxbFile(currentTxbhFile);
 

@@ -25,19 +25,15 @@ namespace TxbImageTool.Conversion
 
 
         #region Create new txb
-        public static void PrepareNewTXB(string txbFilePath, string imgsDir, ImageType imageType, GTEXVersion gtexVersion)
+        public static void PrepareNewTXB(string imgFile, ImageType imgType, GTEXVersion gtexVersion)
         {
-            // Checks
-            if (!Directory.Exists(imgsDir))
-            {
-                SharedMethods.ErrorExit("Specified folder with images does not exist");
-            }
-
             // Start process
-            var txbDir = Path.GetDirectoryName(txbFilePath);
-            var txbName = Path.GetFileName(txbFilePath);
-            var txbFile = Path.Combine(txbDir, txbName);
-            var imgbFile = Path.Combine(txbDir, Path.GetFileNameWithoutExtension(txbFilePath) + ".imgb");
+            var txbName = Path.GetFileNameWithoutExtension(imgFile);
+            txbName = txbName.Remove(txbName.Length - 1, 1).Replace("_cbmap_", "").Replace("_stack_", "").Replace(".txbh", "") + ".txbh";
+
+            var imgDir = Path.GetDirectoryName(imgFile);
+            var txbFile = Path.Combine(imgDir, txbName);
+            var imgbFile = Path.Combine(imgDir, Path.GetFileNameWithoutExtension(txbFile) + ".imgb");
 
             SharedMethods.IfFileFolderExistsDel(txbFile, true);
             SharedMethods.IfFileFolderExistsDel(imgbFile, true);
@@ -50,11 +46,11 @@ namespace TxbImageTool.Conversion
             int counter;
             var gtexDepth = 1;
 
-            switch (imageType)
+            switch (imgType)
             {
                 case ImageType.classic:
                     gtexType = 0;
-                    currentImgFile = Path.Combine(imgsDir, txbFile + ".dds");
+                    currentImgFile = Path.Combine(imgDir, txbName + ".dds");
 
                     if (!File.Exists(currentImgFile))
                     {
@@ -72,7 +68,7 @@ namespace TxbImageTool.Conversion
 
                     for (int cb = 0; cb < 6; cb++)
                     {
-                        currentImgFile = Path.Combine(imgsDir, $"{txbFile}_cbmap_{counter}.dds");
+                        currentImgFile = Path.Combine(imgDir, $"{txbName}_cbmap_{counter}.dds");
                         if (!File.Exists(currentImgFile))
                         {
                             SharedMethods.ErrorExit($"Missing '{currentImgFile}' file in the specified directory");
@@ -113,7 +109,7 @@ namespace TxbImageTool.Conversion
 
                     while (true)
                     {
-                        if (File.Exists(Path.Combine(imgsDir, $"{txbFile}_stack_{counter}.dds")))
+                        if (File.Exists(Path.Combine(imgDir, $"{txbName}_stack_{counter}.dds")))
                         {
                             if (counter == 1)
                             {
@@ -155,19 +151,19 @@ namespace TxbImageTool.Conversion
                 txbWriter.WriteBytesUInt16((ushort)gtexDepth, true);
             }
 
-            var tmpHeaderBlockFile = txbFilePath + ".tmp";
+            var tmpHeaderBlockFile = txbFile + ".tmp";
             SharedMethods.IfFileFolderExistsDel(tmpHeaderBlockFile, true);
-            File.Copy(txbFilePath, tmpHeaderBlockFile);
+            File.Copy(txbFile, tmpHeaderBlockFile);
 
-            IMGBRepack2.RepackIMGBType2(tmpHeaderBlockFile, txbName, imgbFile, imgsDir, false);
+            IMGBRepack2.RepackIMGBType2(tmpHeaderBlockFile, txbName, imgbFile, imgDir, false);
 
             // Finish up
             Console.WriteLine("");
 
             if (File.Exists(imgbFile))
             {
-                SharedMethods.IfFileFolderExistsDel(txbFilePath, true);
-                File.Copy(tmpHeaderBlockFile, txbFilePath);
+                SharedMethods.IfFileFolderExistsDel(txbFile, true);
+                File.Copy(tmpHeaderBlockFile, txbFile);
                 SharedMethods.IfFileFolderExistsDel(tmpHeaderBlockFile, true);
 
                 MessageBox.Show($"Finished building TXB and IMGB files", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);

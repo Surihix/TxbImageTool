@@ -31,6 +31,8 @@
             StatusStrip = new StatusStrip();
             StripStatusLabel = new ToolStripStatusLabel();
             ExtGrpBox = new GroupBox();
+            ExtXGRRadioBtn = new RadioButton();
+            ExtTXB_IMGBRadioBtn = new RadioButton();
             ExtBtn = new Button();
             ConvGrpBox = new GroupBox();
             ConvtBtn = new Button();
@@ -44,8 +46,8 @@
             ClassicTypeRadioBtn = new RadioButton();
             ModeGrpBox = new GroupBox();
             NewXGRRadioBtn = new RadioButton();
-            NewGTEXRadioBtn = new RadioButton();
-            ExistingGTEXRadioBtn = new RadioButton();
+            NewTXBRadioBtn = new RadioButton();
+            ExistingTXBRadioBtn = new RadioButton();
             StatusStrip.SuspendLayout();
             ExtGrpBox.SuspendLayout();
             ConvGrpBox.SuspendLayout();
@@ -72,6 +74,8 @@
             // 
             // ExtGrpBox
             // 
+            ExtGrpBox.Controls.Add(ExtXGRRadioBtn);
+            ExtGrpBox.Controls.Add(ExtTXB_IMGBRadioBtn);
             ExtGrpBox.Controls.Add(ExtBtn);
             ExtGrpBox.Location = new Point(12, 12);
             ExtGrpBox.Name = "ExtGrpBox";
@@ -80,9 +84,31 @@
             ExtGrpBox.TabStop = false;
             ExtGrpBox.Text = "Extraction :";
             // 
+            // ExtXGRRadioBtn
+            // 
+            ExtXGRRadioBtn.AutoSize = true;
+            ExtXGRRadioBtn.Location = new Point(15, 52);
+            ExtXGRRadioBtn.Name = "ExtXGRRadioBtn";
+            ExtXGRRadioBtn.Size = new Size(120, 19);
+            ExtXGRRadioBtn.TabIndex = 2;
+            ExtXGRRadioBtn.Text = "Extract XGR_IMGB";
+            ExtXGRRadioBtn.UseVisualStyleBackColor = true;
+            // 
+            // ExtTXB_IMGBRadioBtn
+            // 
+            ExtTXB_IMGBRadioBtn.AutoSize = true;
+            ExtTXB_IMGBRadioBtn.Checked = true;
+            ExtTXB_IMGBRadioBtn.Location = new Point(15, 27);
+            ExtTXB_IMGBRadioBtn.Name = "ExtTXB_IMGBRadioBtn";
+            ExtTXB_IMGBRadioBtn.Size = new Size(118, 19);
+            ExtTXB_IMGBRadioBtn.TabIndex = 1;
+            ExtTXB_IMGBRadioBtn.TabStop = true;
+            ExtTXB_IMGBRadioBtn.Text = "Extract TXB_IMGB";
+            ExtTXB_IMGBRadioBtn.UseVisualStyleBackColor = true;
+            // 
             // ExtBtn
             // 
-            ExtBtn.Location = new Point(34, 53);
+            ExtBtn.Location = new Point(34, 94);
             ExtBtn.Name = "ExtBtn";
             ExtBtn.Size = new Size(86, 29);
             ExtBtn.TabIndex = 0;
@@ -204,8 +230,8 @@
             // ModeGrpBox
             // 
             ModeGrpBox.Controls.Add(NewXGRRadioBtn);
-            ModeGrpBox.Controls.Add(NewGTEXRadioBtn);
-            ModeGrpBox.Controls.Add(ExistingGTEXRadioBtn);
+            ModeGrpBox.Controls.Add(NewTXBRadioBtn);
+            ModeGrpBox.Controls.Add(ExistingTXBRadioBtn);
             ModeGrpBox.Location = new Point(17, 22);
             ModeGrpBox.Name = "ModeGrpBox";
             ModeGrpBox.Size = new Size(210, 98);
@@ -222,28 +248,31 @@
             NewXGRRadioBtn.TabIndex = 2;
             NewXGRRadioBtn.Text = "Create XGR from folder";
             NewXGRRadioBtn.UseVisualStyleBackColor = true;
+            NewXGRRadioBtn.CheckedChanged += NewXGRRadioBtn_CheckedChanged;
             // 
-            // NewGTEXRadioBtn
+            // NewTXBRadioBtn
             // 
-            NewGTEXRadioBtn.AutoSize = true;
-            NewGTEXRadioBtn.Location = new Point(6, 47);
-            NewGTEXRadioBtn.Name = "NewGTEXRadioBtn";
-            NewGTEXRadioBtn.Size = new Size(114, 19);
-            NewGTEXRadioBtn.TabIndex = 1;
-            NewGTEXRadioBtn.Text = "Create new GTEX";
-            NewGTEXRadioBtn.UseVisualStyleBackColor = true;
+            NewTXBRadioBtn.AutoSize = true;
+            NewTXBRadioBtn.Location = new Point(6, 47);
+            NewTXBRadioBtn.Name = "NewTXBRadioBtn";
+            NewTXBRadioBtn.Size = new Size(107, 19);
+            NewTXBRadioBtn.TabIndex = 1;
+            NewTXBRadioBtn.Text = "Create new TXB";
+            NewTXBRadioBtn.UseVisualStyleBackColor = true;
+            NewTXBRadioBtn.CheckedChanged += NewTXBRadioBtn_CheckedChanged;
             // 
-            // ExistingGTEXRadioBtn
+            // ExistingTXBRadioBtn
             // 
-            ExistingGTEXRadioBtn.AutoSize = true;
-            ExistingGTEXRadioBtn.Checked = true;
-            ExistingGTEXRadioBtn.Location = new Point(6, 22);
-            ExistingGTEXRadioBtn.Name = "ExistingGTEXRadioBtn";
-            ExistingGTEXRadioBtn.Size = new Size(137, 19);
-            ExistingGTEXRadioBtn.TabIndex = 0;
-            ExistingGTEXRadioBtn.TabStop = true;
-            ExistingGTEXRadioBtn.Text = "Update existing GTEX";
-            ExistingGTEXRadioBtn.UseVisualStyleBackColor = true;
+            ExistingTXBRadioBtn.AutoSize = true;
+            ExistingTXBRadioBtn.Checked = true;
+            ExistingTXBRadioBtn.Location = new Point(6, 22);
+            ExistingTXBRadioBtn.Name = "ExistingTXBRadioBtn";
+            ExistingTXBRadioBtn.Size = new Size(130, 19);
+            ExistingTXBRadioBtn.TabIndex = 0;
+            ExistingTXBRadioBtn.TabStop = true;
+            ExistingTXBRadioBtn.Text = "Update existing TXB";
+            ExistingTXBRadioBtn.UseVisualStyleBackColor = true;
+            ExistingTXBRadioBtn.CheckedChanged += ExistingTXBRadioBtn_CheckedChanged;
             // 
             // Core
             // 
@@ -260,6 +289,7 @@
             StatusStrip.ResumeLayout(false);
             StatusStrip.PerformLayout();
             ExtGrpBox.ResumeLayout(false);
+            ExtGrpBox.PerformLayout();
             ConvGrpBox.ResumeLayout(false);
             GtexVerGrpBox.ResumeLayout(false);
             GtexVerGrpBox.PerformLayout();
@@ -288,8 +318,10 @@
         private RadioButton CubemapTypeRadioBtn;
         private RadioButton ClassicTypeRadioBtn;
         private RadioButton NewXGRRadioBtn;
-        private RadioButton NewGTEXRadioBtn;
-        private RadioButton ExistingGTEXRadioBtn;
+        private RadioButton NewTXBRadioBtn;
+        private RadioButton ExistingTXBRadioBtn;
         private ToolStripStatusLabel StripStatusLabel;
+        private RadioButton ExtXGRRadioBtn;
+        private RadioButton ExtTXB_IMGBRadioBtn;
     }
 }

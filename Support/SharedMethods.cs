@@ -1,12 +1,13 @@
-﻿namespace TxbImageTool.Support
+﻿using static TxbImageTool.Support.SharedEnums;
+
+namespace TxbImageTool.Support
 {
     internal class SharedMethods
     {
         public static void ErrorExit(string errorMsg)
         {
-            Console.WriteLine($"Error: {errorMsg}");
-            Console.ReadLine();
-            Environment.Exit(1);
+            MessageBox.Show(errorMsg.Replace("Error: ", ""), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            throw new Exception("Error handled");
         }
 
 
@@ -123,6 +124,29 @@
                         break;
                 }
             }
+        }
+
+
+        public static byte GetGTEXVersion(GTEXVersion gtexVersion)
+        {
+            byte gtexVersionVal = 0;
+
+            switch (gtexVersion)
+            {
+                case GTEXVersion.v1:
+                    gtexVersionVal = 1;
+                    break;
+
+                case GTEXVersion.v2:
+                    gtexVersionVal = 2;
+                    break;
+
+                case GTEXVersion.v3:
+                    gtexVersionVal = 3;
+                    break;
+            }
+
+            return gtexVersionVal;
         }
     }
 }

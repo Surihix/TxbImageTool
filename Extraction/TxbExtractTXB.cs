@@ -4,7 +4,7 @@ using TxbImageTool.Support;
 
 namespace TxbImageTool.Extraction
 {
-    internal class TxbExtract
+    internal class TxbExtractTXB
     {
         public static void BeginExtraction(string txbFile, string imgbFile)
         {

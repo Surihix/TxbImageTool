@@ -62,31 +62,36 @@ namespace TxbImageTool
 
                 if (inXGRFileSelect.ShowDialog() == DialogResult.OK)
                 {
-                    StripStatusLabel.Text = "Extracting....";
+                    var inIMGBFileSelect = CreateOpenFileDialog("Select paired IMGB file", "IMGB files (*.imgb)|*.imgb");
 
-                    Task.Run(() =>
+                    if (inIMGBFileSelect.ShowDialog() == DialogResult.OK)
                     {
-                        try
+                        StripStatusLabel.Text = "Extracting....";
+
+                        Task.Run(() =>
                         {
                             try
                             {
-                                BeginInvoke(new Action(() => EnableDisableButtons(false)));
-                                TxbExtractXGR.BeginExtraction(inXGRFileSelect.FileName);
+                                try
+                                {
+                                    BeginInvoke(new Action(() => EnableDisableButtons(false)));
+                                    TxbExtractXGR.BeginExtraction(inXGRFileSelect.FileName, inIMGBFileSelect.FileName);
+                                }
+                                finally
+                                {
+                                    BeginInvoke(new Action(() => EnableDisableButtons(true)));
+                                    BeginInvoke(new Action(() => StripStatusLabel.Text = "Finished extracting!"));
+                                }
                             }
-                            finally
+                            catch (Exception ex)
                             {
-                                BeginInvoke(new Action(() => EnableDisableButtons(true)));
-                                BeginInvoke(new Action(() => StripStatusLabel.Text = "Finished extracting!"));
+                                if (ex.Message.ToString() != "Error handled")
+                                {
+                                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            if (ex.Message.ToString() != "Error handled")
-                            {
-                                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
-                        }
-                    });
+                        });
+                    }
                 }
             }
         }

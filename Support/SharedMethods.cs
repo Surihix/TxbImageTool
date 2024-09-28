@@ -1,4 +1,5 @@
-﻿using static TxbImageTool.Support.SharedEnums;
+﻿using System.Text;
+using static TxbImageTool.Support.SharedEnums;
 
 namespace TxbImageTool.Support
 {
@@ -147,6 +148,32 @@ namespace TxbImageTool.Support
             }
 
             return gtexVersionVal;
+        }
+
+
+        public static uint GetGTEXChunkPos(string inImgHeaderBlockFile)
+        {
+            uint gtexPos = 0;
+            var gtexChunkString = "GTEX";
+            var gtexChunkStringArray = new byte[4];
+            var imgHeaderBlockFileData = File.ReadAllBytes(inImgHeaderBlockFile);
+
+            for (int g = 0; g < imgHeaderBlockFileData.Length; g++)
+            {
+                if ((char)imgHeaderBlockFileData[g] == gtexChunkString[0])
+                {
+                    Buffer.BlockCopy(imgHeaderBlockFileData, g, gtexChunkStringArray, 0, 4);
+                    var gtex = Encoding.ASCII.GetString(gtexChunkStringArray, 0, 4);
+
+                    if (gtex == gtexChunkString)
+                    {
+                        gtexPos = (uint)g;
+                        break;
+                    }
+                }
+            }
+
+            return gtexPos;
         }
     }
 }

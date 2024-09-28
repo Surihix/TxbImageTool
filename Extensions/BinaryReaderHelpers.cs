@@ -82,7 +82,7 @@ public static class BinaryReaderHelpers
         var readValueBuffer = reader.ReadBytes(readCount);
         ReverseIfBigEndian(isBigEndian, readValueBuffer);
 
-        return Encoding.ASCII.GetString(readValueBuffer).Replace("\0", "");
+        return Encoding.UTF8.GetString(readValueBuffer).Replace("\0", "");
     }
 
 

@@ -9,11 +9,11 @@ namespace TxbImageTool.Extraction
         public static void BeginExtraction(string txbFile, string imgbFile)
         {
             // Start process
-            var txbFileName = Path.GetFileName(txbFile);
-            var imgbFileName = Path.GetFileName(imgbFile);
+            var txbName = Path.GetFileName(txbFile);
+            var imgbName = Path.GetFileName(imgbFile);
             var imgbFileDir = Path.GetDirectoryName(imgbFile);
 
-            var imgbExtractDir = Path.Combine(imgbFileDir, $"_{imgbFileName}");
+            var imgbExtractDir = Path.Combine(imgbFileDir, $"_{imgbName}");
             SharedMethods.IfFileFolderExistsDel(imgbExtractDir, false);
             Directory.CreateDirectory(imgbExtractDir);
 
@@ -31,7 +31,7 @@ namespace TxbImageTool.Extraction
             SharedMethods.IfFileFolderExistsDel(imgbExtractDir, false);
 
             // Finish up
-            MessageBox.Show($"Finished extracting image file(s) with '{txbFileName}' file", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"Finished extracting image file(s) with '{txbName}' file", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

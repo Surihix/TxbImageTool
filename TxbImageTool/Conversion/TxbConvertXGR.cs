@@ -23,7 +23,8 @@ namespace TxbImageTool.Conversion
                 SharedMethods.ErrorExit($"Missing {xgrListFileName} in the specified directory");
             }
 
-            // Deserialize data from json
+            // Deserialize data from json file
+            // and build the base xgr file
             var jsonData = File.ReadAllBytes(xgrListFile);
             var options = new JsonReaderOptions
             {
@@ -57,7 +58,6 @@ namespace TxbImageTool.Conversion
                 File.Move(outIMGBfile, oldIMGBFile);
             }
 
-            // Build base xgr file
             var currentFileName = string.Empty;
             var currentFileExtn = string.Empty;
             var ddsList = new List<(string, ImageType, GTEXVersion)>();

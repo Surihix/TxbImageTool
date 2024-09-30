@@ -1,5 +1,5 @@
-﻿using IMGBlibrary.Repack;
-using IMGBlibrary.Support;
+﻿using IMGBlibrary_Core.Repack;
+using IMGBlibrary_Core.Support;
 using System.Text;
 using System.Text.Json;
 using TxbImageTool.Support;

@@ -1,5 +1,5 @@
-﻿using IMGBlibrary.Support;
-using IMGBlibrary.Unpack;
+﻿using IMGBlibrary_Core.Support;
+using IMGBlibrary_Core.Unpack;
 using TxbImageTool.Support;
 
 namespace TxbImageTool.Extraction

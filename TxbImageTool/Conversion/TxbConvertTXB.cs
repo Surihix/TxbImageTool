@@ -1,4 +1,4 @@
-﻿using IMGBlibrary.Repack;
+﻿using IMGBlibrary_Core.Repack;
 using TxbImageTool.Support;
 using static TxbImageTool.Support.SharedEnums;
 

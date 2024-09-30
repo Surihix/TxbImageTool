@@ -21,79 +21,91 @@ namespace TxbImageTool
         {
             if (ExtTXB_IMGBRadioBtn.Checked)
             {
-                var inTxbFileSelect = CreateOpenFileDialog("Select txb file", "Txb files (*.txb;*.txbh)|*.txb;*.txbh");
-
-                if (inTxbFileSelect.ShowDialog() == DialogResult.OK)
-                {
-                    var inIMGBFileSelect = CreateOpenFileDialog("Select paired IMGB file", "IMGB files (*.imgb)|*.imgb");
-
-                    if (inIMGBFileSelect.ShowDialog() == DialogResult.OK)
-                    {
-                        StripStatusLabel.Text = "Extracting....";
-
-                        Task.Run(() =>
-                        {
-                            try
-                            {
-                                try
-                                {
-                                    BeginInvoke(new Action(() => EnableDisableButtons(false)));
-                                    TxbExtractTXB.BeginExtraction(inTxbFileSelect.FileName, inIMGBFileSelect.FileName);
-                                }
-                                finally
-                                {
-                                    BeginInvoke(new Action(() => EnableDisableButtons(true)));
-                                    BeginInvoke(new Action(() => StripStatusLabel.Text = "Finished extracting!"));
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                if (ex.Message.ToString() != "Error handled")
-                                {
-                                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                }
-                            }
-                        });
-                    }
-                }
+                ExtractTXB();
             }
 
             if (ExtXGRRadioBtn.Checked)
             {
-                var inXGRFileSelect = CreateOpenFileDialog("Select xgr file", "XGR files (*.xgr)|*.xgr");
+                ExtractXGR();
+            }
+        }
 
-                if (inXGRFileSelect.ShowDialog() == DialogResult.OK)
+
+        private void ExtractTXB()
+        {
+            var inTxbFileSelect = CreateOpenFileDialog("Select txb file", "Txb files (*.txb;*.txbh)|*.txb;*.txbh");
+
+            if (inTxbFileSelect.ShowDialog() == DialogResult.OK)
+            {
+                var inIMGBFileSelect = CreateOpenFileDialog("Select paired IMGB file", "IMGB files (*.imgb)|*.imgb");
+
+                if (inIMGBFileSelect.ShowDialog() == DialogResult.OK)
                 {
-                    var inIMGBFileSelect = CreateOpenFileDialog("Select paired IMGB file", "IMGB files (*.imgb)|*.imgb");
+                    StripStatusLabel.Text = "Extracting....";
 
-                    if (inIMGBFileSelect.ShowDialog() == DialogResult.OK)
+                    Task.Run(() =>
                     {
-                        StripStatusLabel.Text = "Extracting....";
-
-                        Task.Run(() =>
+                        try
                         {
                             try
                             {
-                                try
-                                {
-                                    BeginInvoke(new Action(() => EnableDisableButtons(false)));
-                                    TxbExtractXGR.BeginExtraction(inXGRFileSelect.FileName, inIMGBFileSelect.FileName);
-                                }
-                                finally
-                                {
-                                    BeginInvoke(new Action(() => EnableDisableButtons(true)));
-                                    BeginInvoke(new Action(() => StripStatusLabel.Text = "Finished extracting!"));
-                                }
+                                BeginInvoke(new Action(() => EnableDisableButtons(false)));
+                                TxbExtractTXB.BeginExtraction(inTxbFileSelect.FileName, inIMGBFileSelect.FileName);
                             }
-                            catch (Exception ex)
+                            finally
                             {
-                                if (ex.Message.ToString() != "Error handled")
-                                {
-                                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                }
+                                BeginInvoke(new Action(() => EnableDisableButtons(true)));
+                                BeginInvoke(new Action(() => StripStatusLabel.Text = "Finished extracting!"));
                             }
-                        });
-                    }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ex.Message.ToString() != "Error handled")
+                            {
+                                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+
+        private void ExtractXGR()
+        {
+            var inXGRFileSelect = CreateOpenFileDialog("Select xgr file", "XGR files (*.xgr)|*.xgr");
+
+            if (inXGRFileSelect.ShowDialog() == DialogResult.OK)
+            {
+                var inIMGBFileSelect = CreateOpenFileDialog("Select paired IMGB file", "IMGB files (*.imgb)|*.imgb");
+
+                if (inIMGBFileSelect.ShowDialog() == DialogResult.OK)
+                {
+                    StripStatusLabel.Text = "Extracting....";
+
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            try
+                            {
+                                BeginInvoke(new Action(() => EnableDisableButtons(false)));
+                                TxbExtractXGR.BeginExtraction(inXGRFileSelect.FileName, inIMGBFileSelect.FileName);
+                            }
+                            finally
+                            {
+                                BeginInvoke(new Action(() => EnableDisableButtons(true)));
+                                BeginInvoke(new Action(() => StripStatusLabel.Text = "Finished extracting!"));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ex.Message.ToString() != "Error handled")
+                            {
+                                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    });
                 }
             }
         }
@@ -185,6 +197,7 @@ namespace TxbImageTool
             }
         }
 
+
         private void CreateNewTXB()
         {
             var inImgFileSelect = CreateOpenFileDialog("Select image file", "Image file (*.dds)|*.dds");
@@ -248,6 +261,7 @@ namespace TxbImageTool
                 });
             }
         }
+
 
         private void CreateXGR()
         {

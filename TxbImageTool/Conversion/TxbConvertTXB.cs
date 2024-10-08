@@ -1,4 +1,5 @@
 ﻿using IMGBlibrary_Core.Repack;
+using IMGBlibrary_Core.Support;
 using TxbImageTool.Support;
 using static TxbImageTool.Support.SharedEnums;
 
@@ -16,7 +17,19 @@ namespace TxbImageTool.Conversion
             SharedMethods.IfFileFolderExistsDel(imgbFile + ".old", true);
             File.Copy(imgbFile, imgbFile + ".old");
 
-            IMGBRepack1.RepackIMGBType1(txbFile, imgbFile, imgsDir, false);
+            var txbFileName = Path.GetFileName(txbFile);
+            var platform = IMGBEnums.Platforms.win32;
+
+            if (txbFileName.EndsWith("ps3.txb"))
+            {
+                platform = IMGBEnums.Platforms.ps3;
+            }
+            else if (txbFileName.EndsWith("x360.txb"))
+            {
+                platform = IMGBEnums.Platforms.x360;
+            }
+
+            IMGBRepack1.RepackIMGBType1(txbFile, imgbFile, imgsDir, platform, false);
 
             // Finish up
             MessageBox.Show($"Finished updating TXB and IMGB files", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -29,7 +42,19 @@ namespace TxbImageTool.Conversion
         {
             // Start process
             var txbName = Path.GetFileNameWithoutExtension(imgFile);
-            txbName = txbName.Remove(txbName.Length - 1, 1).Replace("_cbmap_", "").Replace("_stack_", "").Replace(".txbh", "") + ".txbh";
+            txbName = txbName.Remove(txbName.Length - 1, 1).Replace("_cbmap_", "").Replace("_stack_", "").Replace(".txb", "") + ".txb";
+
+            var platform = IMGBEnums.Platforms.win32;
+
+            if (txbName.EndsWith("ps3.txb"))
+            {
+                platform = IMGBEnums.Platforms.ps3;
+            }
+            else if (txbName.EndsWith("x360.txb"))
+            {
+                platform = IMGBEnums.Platforms.x360;
+            }
+
 
             var imgDir = Path.GetDirectoryName(imgFile);
             var txbFile = Path.Combine(imgDir, txbName);
@@ -155,7 +180,7 @@ namespace TxbImageTool.Conversion
             SharedMethods.IfFileFolderExistsDel(tmpHeaderBlockFile, true);
             File.Copy(txbFile, tmpHeaderBlockFile);
 
-            IMGBRepack2.RepackIMGBType2(tmpHeaderBlockFile, txbName, imgbFile, imgDir, false);
+            IMGBRepack2.RepackIMGBType2(tmpHeaderBlockFile, txbName, imgbFile, imgDir, platform, false);
 
             // Finish up
             Console.WriteLine("");

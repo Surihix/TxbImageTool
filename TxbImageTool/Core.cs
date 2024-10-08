@@ -33,7 +33,7 @@ namespace TxbImageTool
 
         private void ExtractTXB()
         {
-            var inTxbFileSelect = CreateOpenFileDialog("Select txb file", "Txb files (*.txb;*.txbh)|*.txb;*.txbh");
+            var inTxbFileSelect = CreateOpenFileDialog("Select txb file", "Txb files (*.txb)|*.txb");
 
             if (inTxbFileSelect.ShowDialog() == DialogResult.OK)
             {
@@ -150,7 +150,7 @@ namespace TxbImageTool
 
         private void UpdateExistingTXB()
         {
-            var inTxbFileSelect = CreateOpenFileDialog("Select txb file", "Txb files (*.txb;*.txbh)|*.txb;*.txbh");
+            var inTxbFileSelect = CreateOpenFileDialog("Select txb file", "Txb files (*.txb)|*.txb");
 
             if (inTxbFileSelect.ShowDialog() == DialogResult.OK)
             {

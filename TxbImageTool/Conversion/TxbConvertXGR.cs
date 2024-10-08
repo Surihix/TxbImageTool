@@ -9,14 +9,26 @@ namespace TxbImageTool.Conversion
 {
     internal class TxbConvertXGR
     {
+        private static IMGBEnums.Platforms Platform = IMGBEnums.Platforms.win32;
         public static void PrepareNewXGR(string xgrDir)
         {
             var xgrListFileName = "!!XGR_List.json";
 
             var xgrListFile = Path.Combine(xgrDir, $"{xgrListFileName}");
             var xgrDirParentDir = Path.GetDirectoryName(xgrDir);
-            var outXGRfile = Path.Combine(xgrDirParentDir, Path.GetFileName(xgrDir) + ".xgr");
+
+            var outXGRfileName = Path.GetFileName(xgrDir) + ".xgr";
+            var outXGRfile = Path.Combine(xgrDirParentDir, outXGRfileName);
             var outIMGBfile = Path.Combine(xgrDirParentDir, Path.GetFileNameWithoutExtension(outXGRfile) + ".imgb");
+
+            if (outXGRfileName.EndsWith("ps3.xgr"))
+            {
+                Platform = IMGBEnums.Platforms.ps3;
+            }
+            else if (outXGRfileName.EndsWith("x360.xgr"))
+            {
+                Platform = IMGBEnums.Platforms.x360;
+            }
 
             if (!File.Exists(xgrListFile))
             {
@@ -394,7 +406,7 @@ namespace TxbImageTool.Conversion
 
                                 if (Enum.TryParse(currentFileExtn.Replace(".", ""), false, out IMGBEnums.FileExtensions fileExtension) == true)
                                 {
-                                    IMGBRepack2.RepackIMGBType2(currentFile, Path.GetFileName(currentFile), outIMGBfile, xgrDir, false);
+                                    IMGBRepack2.RepackIMGBType2(currentFile, Path.GetFileName(currentFile), outIMGBfile, xgrDir, Platform, false);
                                 }
 
                                 var currentFileSize = (uint)new FileInfo(currentFile).Length;

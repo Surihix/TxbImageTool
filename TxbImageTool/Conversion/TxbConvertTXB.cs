@@ -17,19 +17,7 @@ namespace TxbImageTool.Conversion
             SharedMethods.IfFileFolderExistsDel(imgbFile + ".old", true);
             File.Copy(imgbFile, imgbFile + ".old");
 
-            var txbFileName = Path.GetFileName(txbFile);
-            var platform = IMGBEnums.Platforms.win32;
-
-            if (txbFileName.EndsWith("ps3.txb"))
-            {
-                platform = IMGBEnums.Platforms.ps3;
-            }
-            else if (txbFileName.EndsWith("x360.txb"))
-            {
-                platform = IMGBEnums.Platforms.x360;
-            }
-
-            IMGBRepack1.RepackIMGBType1(txbFile, imgbFile, imgsDir, platform, false);
+            IMGBRepack1.RepackIMGBType1(txbFile, imgbFile, imgsDir, IMGBEnums.Platforms.win32, false);
 
             // Finish up
             MessageBox.Show($"Finished updating TXB and IMGB files", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -38,23 +26,23 @@ namespace TxbImageTool.Conversion
 
 
         #region Create new txb
+
+        private static List<string> DDStmpList = new();
         public static void PrepareNewTXB(string imgFile, ImageType imgType, GTEXVersion gtexVersion)
         {
             // Start process
             var txbName = Path.GetFileNameWithoutExtension(imgFile);
-            txbName = txbName.Remove(txbName.Length - 1, 1).Replace("_cbmap_", "").Replace("_stack_", "").Replace(".txb", "") + ".txb";
 
-            var platform = IMGBEnums.Platforms.win32;
-
-            if (txbName.EndsWith("ps3.txb"))
+            if (txbName.Contains("_cbmap_") || txbName.Contains("_stack_"))
             {
-                platform = IMGBEnums.Platforms.ps3;
+                txbName = txbName.Remove(txbName.Length - 1, 1).Replace("_cbmap_", "").Replace("_stack_", "") + ".txb";
             }
-            else if (txbName.EndsWith("x360.txb"))
+            else
             {
-                platform = IMGBEnums.Platforms.x360;
+                txbName += ".txb";
             }
 
+            var ddsNameStartString = Path.GetFileNameWithoutExtension(txbName);
 
             var imgDir = Path.GetDirectoryName(imgFile);
             var txbFile = Path.Combine(imgDir, txbName);
@@ -66,8 +54,8 @@ namespace TxbImageTool.Conversion
             SharedMethods.CreateNewTxbFile(txbFile);
 
             var ddsVars = new DDSVariables();
-            byte gtexType = byte.MaxValue;
-            string currentImgFile = string.Empty;
+            var gtexType = byte.MaxValue;
+            var currentImgFile = string.Empty;
             int counter;
             var gtexDepth = 1;
 
@@ -75,7 +63,7 @@ namespace TxbImageTool.Conversion
             {
                 case ImageType.classic:
                     gtexType = 0;
-                    currentImgFile = Path.Combine(imgDir, txbName + ".dds");
+                    currentImgFile = Path.Combine(imgDir, ddsNameStartString + ".dds");
 
                     if (!File.Exists(currentImgFile))
                     {
@@ -84,6 +72,12 @@ namespace TxbImageTool.Conversion
 
                     ddsVars.DDSFile = currentImgFile;
                     SharedMethods.GetDDSFormat(ddsVars);
+
+                    var tmpCopyDDSclsFile = Path.Combine(imgDir, ddsNameStartString + ".txb" + ".dds");
+                    SharedMethods.IfFileFolderExistsDel(tmpCopyDDSclsFile, true);
+
+                    File.Copy(ddsVars.DDSFile, tmpCopyDDSclsFile);
+                    DDStmpList.Add(tmpCopyDDSclsFile);
                     break;
 
 
@@ -93,11 +87,17 @@ namespace TxbImageTool.Conversion
 
                     for (int cb = 0; cb < 6; cb++)
                     {
-                        currentImgFile = Path.Combine(imgDir, $"{txbName}_cbmap_{counter}.dds");
+                        currentImgFile = Path.Combine(imgDir, $"{ddsNameStartString}_cbmap_{counter}.dds");
                         if (!File.Exists(currentImgFile))
                         {
                             SharedMethods.ErrorExit($"Missing '{currentImgFile}' file in the specified directory");
                         }
+
+                        var currentTmpCopyDDScbmapFile = Path.Combine(imgDir, $"{ddsNameStartString}.txb_cbmap_{counter}.dds");
+                        SharedMethods.IfFileFolderExistsDel(currentTmpCopyDDScbmapFile, true);
+
+                        File.Copy(currentImgFile, currentTmpCopyDDScbmapFile);
+                        DDStmpList.Add(currentTmpCopyDDScbmapFile);
 
                         if (counter == 1)
                         {
@@ -134,13 +134,21 @@ namespace TxbImageTool.Conversion
 
                     while (true)
                     {
-                        if (File.Exists(Path.Combine(imgDir, $"{txbName}_stack_{counter}.dds")))
+                        currentImgFile = Path.Combine(imgDir, $"{ddsNameStartString}_stack_{counter}.dds");
+
+                        if (File.Exists(currentImgFile))
                         {
                             if (counter == 1)
                             {
                                 ddsVars.DDSFile = currentImgFile;
                                 SharedMethods.GetDDSFormat(ddsVars);
                             }
+
+                            var currentTmpCopyDDSstackFile = Path.Combine(imgDir, $"{ddsNameStartString}.txb_stack_{counter}.dds");
+                            SharedMethods.IfFileFolderExistsDel(currentTmpCopyDDSstackFile, true);
+
+                            File.Copy(currentImgFile, currentTmpCopyDDSstackFile);
+                            DDStmpList.Add(currentTmpCopyDDSstackFile);
 
                             counter++;
                         }
@@ -180,7 +188,13 @@ namespace TxbImageTool.Conversion
             SharedMethods.IfFileFolderExistsDel(tmpHeaderBlockFile, true);
             File.Copy(txbFile, tmpHeaderBlockFile);
 
-            IMGBRepack2.RepackIMGBType2(tmpHeaderBlockFile, txbName, imgbFile, imgDir, platform, false);
+            IMGBRepack2.RepackIMGBType2(tmpHeaderBlockFile, txbName, imgbFile, imgDir, IMGBEnums.Platforms.win32, false);
+
+            // Cleanup tmp dds files
+            foreach (var tmpDDS in DDStmpList)
+            {
+                SharedMethods.IfFileFolderExistsDel(tmpDDS, true);
+            }
 
             // Finish up
             Console.WriteLine("");

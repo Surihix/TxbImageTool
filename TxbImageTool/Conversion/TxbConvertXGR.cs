@@ -9,9 +9,15 @@ namespace TxbImageTool.Conversion
 {
     internal class TxbConvertXGR
     {
+        private static List<(string, ImageType, GTEXVersion)> DDSlist = new();
+        private static List<string> DDStmpList = new();
+
         private static IMGBEnums.Platforms Platform = IMGBEnums.Platforms.win32;
         public static void PrepareNewXGR(string xgrDir)
         {
+            DDSlist.Clear();
+            DDStmpList.Clear();
+
             var xgrListFileName = "!!XGR_List.json";
 
             var xgrListFile = Path.Combine(xgrDir, $"{xgrListFileName}");
@@ -72,7 +78,6 @@ namespace TxbImageTool.Conversion
 
             var currentFileName = string.Empty;
             var currentFileExtn = string.Empty;
-            var ddsList = new List<(string, ImageType, GTEXVersion)>();
 
             using (var outXGRwriter = new StreamWriter(outXGRfile, true, new UTF8Encoding(false)))
             {
@@ -129,7 +134,7 @@ namespace TxbImageTool.Conversion
 
                     if (isImg)
                     {
-                        var imgFile = currentFileName + ".txbh." + currentFileExtn;
+                        var imgFile = currentFileName + "." + currentFileExtn;
                         outXGRwriter.Write("txbh");
                         PadNullStringChara(outXGRwriter, 8 - 4);
 
@@ -143,7 +148,7 @@ namespace TxbImageTool.Conversion
                             SharedMethods.ErrorExit($"Invalid type specified for image file '{imgFile}' in the json file");
                         }
 
-                        ddsList.Add(($"{imgFile}", imgType, gtexVersion));
+                        DDSlist.Add(($"{imgFile}", imgType, gtexVersion));
                     }
                     else
                     {
@@ -165,14 +170,21 @@ namespace TxbImageTool.Conversion
 
 
             // Build txbh files
-            if (ddsList.Count != 0)
+            if (DDSlist.Count != 0)
             {
-                BuildTxbhFiles(ddsList, xgrDirParentDir, xgrDir);
+                BuildTxbhFiles(xgrDirParentDir, xgrDir);
             }
 
 
             // Pack all files to xgr
             BuildXGRFile(outXGRfile, totalFileCount, xgrDir, outIMGBfile);
+
+
+            // Cleanup tmp dds files
+            foreach (var tmpDDS in DDStmpList)
+            {
+                SharedMethods.IfFileFolderExistsDel(tmpDDS, true);
+            }
 
 
             // Finish up
@@ -245,23 +257,23 @@ namespace TxbImageTool.Conversion
         }
 
 
-        private static void BuildTxbhFiles(List<(string, ImageType, GTEXVersion)> ddsList, string xgrDirParentDir, string xgrDir)
+        private static void BuildTxbhFiles(string xgrDirParentDir, string xgrDir)
         {
 
             var ddsVars = new DDSVariables();
 
             var gtexDepth = 1;
             byte gtexType = 0;
-            for (int d = 0; d < ddsList.Count; d++)
+            for (int d = 0; d < DDSlist.Count; d++)
             {
-                var currentDataFromList = ddsList[d];
+                var currentDataFromList = DDSlist[d];
 
                 var currentDDSname = currentDataFromList.Item1;
                 var currentDDStype = currentDataFromList.Item2;
                 var currentGTEXver = currentDataFromList.Item3;
 
                 var currentTxbhFile = string.Empty;
-                currentTxbhFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname));
+                currentTxbhFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh");
                 SharedMethods.IfFileFolderExistsDel(currentTxbhFile, true);
                 SharedMethods.CreateNewTxbFile(currentTxbhFile);
 
@@ -273,10 +285,16 @@ namespace TxbImageTool.Conversion
 
                         if (!File.Exists(ddsVars.DDSFile))
                         {
-                            SharedMethods.ErrorExit($"Missing image file {ddsVars.DDSFile}");
+                            SharedMethods.ErrorExit($"Missing '{ddsVars.DDSFile}' file");
                         }
 
                         SharedMethods.GetDDSFormat(ddsVars);
+
+                        var currentTmpCopyDDSclsFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh" + ".dds");
+                        SharedMethods.IfFileFolderExistsDel(currentTmpCopyDDSclsFile, true);
+
+                        File.Copy(ddsVars.DDSFile, currentTmpCopyDDSclsFile);
+                        DDStmpList.Add(currentTmpCopyDDSclsFile);
                         break;
 
 
@@ -286,7 +304,7 @@ namespace TxbImageTool.Conversion
 
                         if (!File.Exists(ddsVars.DDSFile))
                         {
-                            SharedMethods.ErrorExit($"Missing image file {ddsVars.DDSFile}");
+                            SharedMethods.ErrorExit($"Missing '{ddsVars.DDSFile}' file");
                         }
 
                         SharedMethods.GetDDSFormat(ddsVars);
@@ -308,6 +326,24 @@ namespace TxbImageTool.Conversion
                             offsetsWriter.BaseStream.Position = 16;
                             offsetsWriter.WriteBytesUInt32(gtexLength, false);
                         }
+
+                        for (int i = 1; i < 7; i++)
+                        {
+                            var currentDDScbmapFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + "_cbmap_" + i + ".dds");
+
+                            if (File.Exists(currentDDScbmapFile))
+                            {
+                                var currentTmpCopyDDScbmapFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh_cbmap_" + i + ".dds");
+                                SharedMethods.IfFileFolderExistsDel(currentTmpCopyDDScbmapFile, true);
+
+                                File.Copy(currentDDScbmapFile, currentTmpCopyDDScbmapFile);
+                                DDStmpList.Add(currentTmpCopyDDScbmapFile);
+                            }
+                            else
+                            {
+                                SharedMethods.ErrorExit($"Missing '{Path.GetFileName(currentDDScbmapFile)}' file");
+                            }
+                        }
                         break;
 
 
@@ -317,7 +353,7 @@ namespace TxbImageTool.Conversion
 
                         if (!File.Exists(ddsVars.DDSFile))
                         {
-                            SharedMethods.ErrorExit($"Missing image file {ddsVars.DDSFile}");
+                            SharedMethods.ErrorExit($"Missing '{ddsVars.DDSFile}' file");
                         }
 
                         SharedMethods.GetDDSFormat(ddsVars);
@@ -325,8 +361,16 @@ namespace TxbImageTool.Conversion
                         var counter = 1;
                         while (true)
                         {
-                            if (File.Exists(Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + $"_stack_{counter}" + ".dds")))
+                            var currentDDSstackFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + $"_stack_{counter}" + ".dds");
+                            
+                            if (File.Exists(currentDDSstackFile))
                             {
+                                var currentTmpCopyDDSstackFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh_stack_" + counter + ".dds");
+                                SharedMethods.IfFileFolderExistsDel(currentTmpCopyDDSstackFile, true);
+                                
+                                File.Copy(currentDDSstackFile, currentTmpCopyDDSstackFile);
+                                DDStmpList.Add(currentTmpCopyDDSstackFile);
+
                                 counter++;
                             }
                             else
@@ -339,6 +383,12 @@ namespace TxbImageTool.Conversion
                         if (counter < 2)
                         {
                             SharedMethods.ErrorExit("There are no _stack_ type dds image files in the specified directory");
+                        }
+
+                        for (int i = 1; i < counter + 1; i++)
+                        {
+
+
                         }
 
                         gtexDepth = counter;
@@ -384,6 +434,8 @@ namespace TxbImageTool.Conversion
 
                             uint readStartPos = 16;
                             uint writeStartPos = 32;
+                            bool isTxbh = false;
+
                             for (int f = 0; f < totalFileCount; f++)
                             {
                                 outXGRoffsetReader.BaseStream.Position = readStartPos;
@@ -407,6 +459,7 @@ namespace TxbImageTool.Conversion
                                 if (Enum.TryParse(currentFileExtn.Replace(".", ""), false, out IMGBEnums.FileExtensions fileExtension) == true)
                                 {
                                     IMGBRepack2.RepackIMGBType2(currentFile, Path.GetFileName(currentFile), outIMGBfile, xgrDir, Platform, false);
+                                    isTxbh = true;
                                 }
 
                                 var currentFileSize = (uint)new FileInfo(currentFile).Length;
@@ -420,7 +473,11 @@ namespace TxbImageTool.Conversion
                                     currentFileStream.CopyStreamTo(outXGRdataStream, currentFileSize, false);
                                 }
 
-                                SharedMethods.IfFileFolderExistsDel(currentFile, true);
+                                if (isTxbh)
+                                {
+                                    SharedMethods.IfFileFolderExistsDel(currentFile, true);
+                                    isTxbh = false;
+                                }
 
                                 // Pad null bytes to make the next
                                 // start position divisible by a 

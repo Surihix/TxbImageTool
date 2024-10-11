@@ -402,7 +402,7 @@ namespace TxbImageTool.Conversion
                     txbWriter.Write(gtexVersionVal);
 
                     txbWriter.BaseStream.Position = 70;
-                    txbWriter.Write(ddsVars.DDSFormatValue);
+                    txbWriter.Write(ddsVars.DDSFormatVal);
 
                     txbWriter.BaseStream.Position = 73;
                     txbWriter.Write(gtexType);

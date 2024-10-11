@@ -2,8 +2,9 @@
 {
     internal class DDSVariables
     {
-        public string? DDSFile { get; set; }
-        public uint DDSMipCount { get; set; }
-        public byte DDSFormatValue { get; set; }
+        public string? DDSName;
+        public string? DDSFile;
+        public uint DDSMipCount;
+        public byte DDSFormatVal;
     }
 }

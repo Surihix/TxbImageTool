@@ -99,25 +99,25 @@ namespace TxbImageTool.Support
                         if (ddSVariables.DDSMipCount > 1)
                         {
                             // R8G8B8A8 (with Mips)
-                            ddSVariables.DDSFormatValue = 3;
+                            ddSVariables.DDSFormatVal = 3;
                         }
                         else
                         {
                             // R8G8B8A8 (without Mips)
-                            ddSVariables.DDSFormatValue = 4;
+                            ddSVariables.DDSFormatVal = 4;
                         }
                         break;
 
                     case "DXT1":
-                        ddSVariables.DDSFormatValue = 24;
+                        ddSVariables.DDSFormatVal = 24;
                         break;
 
                     case "DXT3":
-                        ddSVariables.DDSFormatValue = 25;
+                        ddSVariables.DDSFormatVal = 25;
                         break;
 
                     case "DXT5":
-                        ddSVariables.DDSFormatValue = 26;
+                        ddSVariables.DDSFormatVal = 26;
                         break;
 
                     default:

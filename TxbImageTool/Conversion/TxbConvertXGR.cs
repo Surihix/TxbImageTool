@@ -11,7 +11,6 @@ namespace TxbImageTool.Conversion
     {
         private static List<(string, ImageType, GTEXVersion)> DDSlist = new();
         private static List<string> DDStmpList = new();
-
         private static IMGBEnums.Platforms Platform = IMGBEnums.Platforms.win32;
         public static void PrepareNewXGR(string xgrDir)
         {
@@ -53,14 +52,14 @@ namespace TxbImageTool.Conversion
             var jsonReader = new Utf8JsonReader(jsonData, options);
             _ = jsonReader.Read();
 
-            CheckTokenType("PropertyName", ref jsonReader, "totalFileCount");
-            CheckPropertyName(ref jsonReader, "totalFileCount");
-            CheckTokenType("Number", ref jsonReader, "totalFileCount");
+            JSONMethods.CheckTokenType("PropertyName", ref jsonReader, "totalFileCount");
+            JSONMethods.CheckPropertyName(ref jsonReader, "totalFileCount");
+            JSONMethods.CheckTokenType("Number", ref jsonReader, "totalFileCount");
             var totalFileCount = jsonReader.GetUInt32();
 
-            CheckTokenType("PropertyName", ref jsonReader, "files");
-            CheckPropertyName(ref jsonReader, "files");
-            CheckTokenType("Array", ref jsonReader, "files");
+            JSONMethods.CheckTokenType("PropertyName", ref jsonReader, "files");
+            JSONMethods.CheckPropertyName(ref jsonReader, "files");
+            JSONMethods.CheckTokenType("Array", ref jsonReader, "files");
 
             if (File.Exists(outXGRfile))
             {
@@ -102,7 +101,7 @@ namespace TxbImageTool.Conversion
                     }
 
                     // Get fileName
-                    CheckTokenType("PropertyName", ref jsonReader, "fileName");
+                    JSONMethods.CheckTokenType("PropertyName", ref jsonReader, "fileName");
                     _ = jsonReader.Read();
                     currentFileName = jsonReader.GetString();
 
@@ -113,22 +112,22 @@ namespace TxbImageTool.Conversion
                     PadNullStringChara(outXGRwriter, (16 - (uint)currentFileNameArray.Length) + 8);
 
                     // Get fileExtension
-                    CheckTokenType("PropertyName", ref jsonReader, "extension");
+                    JSONMethods.CheckTokenType("PropertyName", ref jsonReader, "extension");
                     _ = jsonReader.Read();
                     currentFileExtn = jsonReader.GetString();
 
                     // Get image bool
-                    CheckTokenType("PropertyName", ref jsonReader, "isImage");
+                    JSONMethods.CheckTokenType("PropertyName", ref jsonReader, "isImage");
                     _ = jsonReader.Read();
                     var isImg = jsonReader.GetBoolean();
 
                     // Get gtex version
-                    CheckTokenType("PropertyName", ref jsonReader, "gtexVersion");
+                    JSONMethods.CheckTokenType("PropertyName", ref jsonReader, "gtexVersion");
                     _ = jsonReader.Read();
                     var gtexVersionVal = jsonReader.GetByte();
 
                     // Get image type
-                    CheckTokenType("PropertyName", ref jsonReader, "gtexVersion");
+                    JSONMethods.CheckTokenType("PropertyName", ref jsonReader, "gtexVersion");
                     _ = jsonReader.Read();
                     var imageType = jsonReader.GetString();
 
@@ -172,7 +171,27 @@ namespace TxbImageTool.Conversion
             // Build txbh files
             if (DDSlist.Count != 0)
             {
-                BuildTxbhFiles(xgrDirParentDir, xgrDir);
+                for (int d = 0; d < DDSlist.Count; d++)
+                {
+                    var currentDataFromList = DDSlist[d];
+
+                    var currentDDSname = currentDataFromList.Item1;
+                    var currentDDStype = currentDataFromList.Item2;
+                    var currentGTEXver = currentDataFromList.Item3;
+
+                    var currentTxbhFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh");
+                    SharedMethods.IfFileFolderExistsDel(currentTxbhFile, true);
+                    GTEXMethods.CreateNewTxbFile(currentTxbhFile);
+
+                    var gtexVars = new GTEXVariables
+                    {
+                        TXBExtension = ".txbh",
+                        GTEXVersionVal = GTEXMethods.GetGTEXVersion(currentGTEXver)
+                    };
+
+                    GTEXMethods.GTEXPrep(currentDDStype, xgrDir, gtexVars, Path.GetFileNameWithoutExtension(currentDDSname), DDStmpList);
+                    GTEXMethods.UpdateBaseGTEXOffsets(currentTxbhFile, gtexVars);
+                }
             }
 
 
@@ -197,219 +216,6 @@ namespace TxbImageTool.Conversion
             for (int p = 0; p < padding; p++)
             {
                 streamName.Write("\0");
-            }
-        }
-
-
-        private static void CheckTokenType(string tokenType, ref Utf8JsonReader jsonReader, string property)
-        {
-            _ = jsonReader.Read();
-
-            switch (tokenType)
-            {
-                case "Array":
-                    if (jsonReader.TokenType != JsonTokenType.StartArray)
-                    {
-                        SharedMethods.ErrorExit($"Specified {property} property's value is not a number");
-                    }
-                    break;
-
-                case "Bool":
-                    if (jsonReader.TokenType != JsonTokenType.True)
-                    {
-                        if (jsonReader.TokenType != JsonTokenType.False)
-                        {
-                            SharedMethods.ErrorExit($"Specified {property} property's value is not a boolean");
-                        }
-                    }
-                    break;
-
-                case "Number":
-                    if (jsonReader.TokenType != JsonTokenType.Number)
-                    {
-                        SharedMethods.ErrorExit($"Specified {property} property's value is not a number");
-                    }
-                    break;
-
-                case "PropertyName":
-                    if (jsonReader.TokenType != JsonTokenType.PropertyName)
-                    {
-                        SharedMethods.ErrorExit($"{property} type is not a valid PropertyName");
-                    }
-                    break;
-
-                case "String":
-                    if (jsonReader.TokenType != JsonTokenType.String)
-                    {
-                        SharedMethods.ErrorExit($"Specified {property} property's value is not a string");
-                    }
-                    break;
-            }
-        }
-
-
-        private static void CheckPropertyName(ref Utf8JsonReader jsonReader, string propertyName)
-        {
-            if (jsonReader.GetString() != propertyName)
-            {
-                SharedMethods.ErrorExit($"Missing {propertyName} property at expected position");
-            }
-        }
-
-
-        private static void BuildTxbhFiles(string xgrDirParentDir, string xgrDir)
-        {
-
-            var ddsVars = new DDSVariables();
-
-            var gtexDepth = 1;
-            byte gtexType = 0;
-            for (int d = 0; d < DDSlist.Count; d++)
-            {
-                var currentDataFromList = DDSlist[d];
-
-                var currentDDSname = currentDataFromList.Item1;
-                var currentDDStype = currentDataFromList.Item2;
-                var currentGTEXver = currentDataFromList.Item3;
-
-                var currentTxbhFile = string.Empty;
-                currentTxbhFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh");
-                SharedMethods.IfFileFolderExistsDel(currentTxbhFile, true);
-                SharedMethods.CreateNewTxbFile(currentTxbhFile);
-
-                switch (currentDDStype)
-                {
-                    case ImageType.classic:
-                        gtexType = 0;
-                        ddsVars.DDSFile = Path.Combine(xgrDirParentDir, xgrDir, currentDDSname);
-
-                        if (!File.Exists(ddsVars.DDSFile))
-                        {
-                            SharedMethods.ErrorExit($"Missing '{ddsVars.DDSFile}' file");
-                        }
-
-                        SharedMethods.GetDDSFormat(ddsVars);
-
-                        var currentTmpCopyDDSclsFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh" + ".dds");
-                        SharedMethods.IfFileFolderExistsDel(currentTmpCopyDDSclsFile, true);
-
-                        File.Copy(ddsVars.DDSFile, currentTmpCopyDDSclsFile);
-                        DDStmpList.Add(currentTmpCopyDDSclsFile);
-                        break;
-
-
-                    case ImageType.cubemap:
-                        gtexType = 1;
-                        ddsVars.DDSFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + "_cbmap_1" + ".dds");
-
-                        if (!File.Exists(ddsVars.DDSFile))
-                        {
-                            SharedMethods.ErrorExit($"Missing '{ddsVars.DDSFile}' file");
-                        }
-
-                        SharedMethods.GetDDSFormat(ddsVars);
-
-                        using (var offsetsWriter = new BinaryWriter(File.Open(currentTxbhFile, FileMode.Open, FileAccess.Write)))
-                        {
-                            offsetsWriter.BaseStream.Position = 96;
-
-                            for (int p = 0; p < 6 * ddsVars.DDSMipCount; p++)
-                            {
-                                offsetsWriter.WriteBytesUInt64(0, false);
-                            }
-
-                            offsetsWriter.BaseStream.Position = 71;
-                            offsetsWriter.Write((byte)ddsVars.DDSMipCount);
-
-                            var gtexLength = (uint)offsetsWriter.BaseStream.Length;
-
-                            offsetsWriter.BaseStream.Position = 16;
-                            offsetsWriter.WriteBytesUInt32(gtexLength, false);
-                        }
-
-                        for (int i = 1; i < 7; i++)
-                        {
-                            var currentDDScbmapFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + "_cbmap_" + i + ".dds");
-
-                            if (File.Exists(currentDDScbmapFile))
-                            {
-                                var currentTmpCopyDDScbmapFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh_cbmap_" + i + ".dds");
-                                SharedMethods.IfFileFolderExistsDel(currentTmpCopyDDScbmapFile, true);
-
-                                File.Copy(currentDDScbmapFile, currentTmpCopyDDScbmapFile);
-                                DDStmpList.Add(currentTmpCopyDDScbmapFile);
-                            }
-                            else
-                            {
-                                SharedMethods.ErrorExit($"Missing '{Path.GetFileName(currentDDScbmapFile)}' file");
-                            }
-                        }
-                        break;
-
-
-                    case ImageType.stack:
-                        gtexType = 2;
-                        ddsVars.DDSFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + "_stack_1" + ".dds");
-
-                        if (!File.Exists(ddsVars.DDSFile))
-                        {
-                            SharedMethods.ErrorExit($"Missing '{ddsVars.DDSFile}' file");
-                        }
-
-                        SharedMethods.GetDDSFormat(ddsVars);
-
-                        var counter = 1;
-                        while (true)
-                        {
-                            var currentDDSstackFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + $"_stack_{counter}" + ".dds");
-                            
-                            if (File.Exists(currentDDSstackFile))
-                            {
-                                var currentTmpCopyDDSstackFile = Path.Combine(xgrDirParentDir, xgrDir, Path.GetFileNameWithoutExtension(currentDDSname) + ".txbh_stack_" + counter + ".dds");
-                                SharedMethods.IfFileFolderExistsDel(currentTmpCopyDDSstackFile, true);
-                                
-                                File.Copy(currentDDSstackFile, currentTmpCopyDDSstackFile);
-                                DDStmpList.Add(currentTmpCopyDDSstackFile);
-
-                                counter++;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-
-                        counter--;
-                        if (counter < 2)
-                        {
-                            SharedMethods.ErrorExit("There are no _stack_ type dds image files in the specified directory");
-                        }
-
-                        for (int i = 1; i < counter + 1; i++)
-                        {
-
-
-                        }
-
-                        gtexDepth = counter;
-                        break;
-                }
-
-                using (var txbWriter = new BinaryWriter(File.Open(currentTxbhFile, FileMode.Open, FileAccess.Write)))
-                {
-                    txbWriter.BaseStream.Position = 68;
-                    var gtexVersionVal = SharedMethods.GetGTEXVersion(currentGTEXver);
-                    txbWriter.Write(gtexVersionVal);
-
-                    txbWriter.BaseStream.Position = 70;
-                    txbWriter.Write(ddsVars.DDSFormatVal);
-
-                    txbWriter.BaseStream.Position = 73;
-                    txbWriter.Write(gtexType);
-
-                    txbWriter.BaseStream.Position = 78;
-                    txbWriter.WriteBytesUInt16((ushort)gtexDepth, true);
-                }
             }
         }
 

@@ -3,7 +3,7 @@ using static TxbImageTool.Support.SharedEnums;
 
 namespace TxbImageTool.Conversion
 {
-    internal class TXBMethods
+    internal class GTEXMethods
     {
         public static void CreateNewTxbFile(string txbFile)
         {
@@ -94,7 +94,7 @@ namespace TxbImageTool.Conversion
                         SharedMethods.ErrorExit($"Missing {currentImgFile} file in the specified directory");
                     }
 
-                    GetDDSFormat(currentImgFile, gtexVars);
+                    GetDDSMipAndFormat(currentImgFile, gtexVars);
 
                     var tmpCopyDDSclsFile = Path.Combine(imgDir, ddsName + gtexVars.TXBExtension + ".dds");
                     SharedMethods.IfFileFolderExistsDel(tmpCopyDDSclsFile, true);
@@ -124,7 +124,7 @@ namespace TxbImageTool.Conversion
 
                         if (counter == 1)
                         {
-                            GetDDSFormat(currentImgFile, gtexVars);
+                            GetDDSMipAndFormat(currentImgFile, gtexVars);
                         }
 
                         counter++;
@@ -144,7 +144,7 @@ namespace TxbImageTool.Conversion
                         {
                             if (counter == 1)
                             {
-                                GetDDSFormat(currentImgFile, gtexVars);
+                                GetDDSMipAndFormat(currentImgFile, gtexVars);
                             }
 
                             var currentTmpCopyDDSstackFile = Path.Combine(imgDir, $"{ddsName}{gtexVars.TXBExtension}_stack_{counter}.dds");
@@ -173,7 +173,7 @@ namespace TxbImageTool.Conversion
         }
 
 
-        private static void GetDDSFormat(string imgFile, GTEXVariables gtexVars)
+        private static void GetDDSMipAndFormat(string imgFile, GTEXVariables gtexVars)
         {
             using (var ddsReader = new BinaryReader(File.Open(imgFile, FileMode.Open, FileAccess.Read)))
             {

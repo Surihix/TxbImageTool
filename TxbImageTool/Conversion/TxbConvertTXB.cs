@@ -50,18 +50,18 @@ namespace TxbImageTool.Conversion
             SharedMethods.IfFileFolderExistsDel(txbFile, true);
             SharedMethods.IfFileFolderExistsDel(imgbFile, true);
 
-            TXBMethods.CreateNewTxbFile(txbFile);
+            GTEXMethods.CreateNewTxbFile(txbFile);
 
             var gtexVars = new GTEXVariables
             {
                 TXBExtension = ".txb",
-                GTEXVersionVal = TXBMethods.GetGTEXVersion(gtexVersion)
+                GTEXVersionVal = GTEXMethods.GetGTEXVersion(gtexVersion)
             };
 
             var ddsTmpList = new List<string>();
 
-            TXBMethods.GTEXPrep(imgType, imgDir, gtexVars, ddsName, ddsTmpList);
-            TXBMethods.UpdateBaseGTEXOffsets(txbFile, gtexVars);
+            GTEXMethods.GTEXPrep(imgType, imgDir, gtexVars, ddsName, ddsTmpList);
+            GTEXMethods.UpdateBaseGTEXOffsets(txbFile, gtexVars);
 
             var tmpHeaderBlockFile = txbFile + ".tmp";
             SharedMethods.IfFileFolderExistsDel(tmpHeaderBlockFile, true);

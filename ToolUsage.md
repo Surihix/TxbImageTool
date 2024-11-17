@@ -1,6 +1,6 @@
 # Instructions
 
-Please refer to the [Image types](https://github.com/Surihix/TxbImageTool/master/ToolUsage.md#image-types) section, for more info about the image files.
+Please refer to the [Image types](https://github.com/Surihix/TxbImageTool/blob/master/ToolUsage.md#image-types) section, for more info about the image files.
 
 ## Extraction
 ### - Extract TXB_IMGB
@@ -24,13 +24,13 @@ This function allows you to create a TXB and IMGB file pair for a image file
 
 For this function, you have to select the folder where the image file is present and then set the image type, and the gtex version. if the image type is cubemap or stack, then make sure the appropriate image files are present in the folder. 
 
-Refer to the [Packing image type](https://github.com/Surihix/TxbImageTool/master/ToolUsage.md#packing-image-type) section for more information.
+Refer to the [Packing image type](https://github.com/Surihix/TxbImageTool/blob/master/ToolUsage.md#packing-image-type) section for more information.
 
 
 ### - Create XGR from folder
 This function will create a XGR and IMGB file from a folder containing one or more image files.
 
-The foldername will be used as the XGR and IMGB filenames. also refer to the [Packing image type](https://github.com/Surihix/TxbImageTool/master/ToolUsage.md#packing-image-type) section for more information.
+The foldername will be used as the XGR and IMGB filenames. also refer to the [Packing image type](https://github.com/Surihix/TxbImageTool/blob/master/ToolUsage.md#packing-image-type) section for more information.
 
 To use this function, a ``!!XGR_List.json`` must be present inside the folder containing the image files. this json file would contain information about each files present in the folder like the filename (without extension), the file extension, a boolean value that determines whether the file is a image, the GTEX_Version to use if the file is a image and the image type. 
 
@@ -80,7 +80,7 @@ Here is a rough template that you can follow for your `!!XGR_List.json` file:
 }
 ```
 
-Set a proper value to the `gtexVersion` and `imageType` properties only if the file is a image. otherwise set it `0` and `""` respectively
+Set a proper value to the `gtexVersion` and `imageType` properties only if the file is a image. otherwise set it `0` and `""` respectively.
 
 ## Image types
 This section will breifly go over the different types of image files that you would get from the TXB and IMGB files.
